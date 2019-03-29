@@ -1,0 +1,220 @@
+<!DOCTYPE HTML >
+<html>
+<head>
+<title>验证</title>
+<script src="/js/jquery-1.7.2.js"></script>
+<style type="text/css">
+body{width: 100%}
+.i1{width: 40%;}
+.i2{width: 6%;}
+#rv{width: 40%;float: left;}
+#cv{width: 50%;float: left;}
+#detect_info{width: 60%;float: left;}
+#video_div{width: 39%;float: left;}
+</style>
+</head>
+
+<body>
+<div id="video_div">
+<div id="rv">
+	<video id="video1" autoplay="" width="120px" height="90px"></video>
+	
+	<form method="POST" id="form_id">
+		<p>
+			手机号<input type="text" name="telNumber" value="13666666666" class="i1"  />
+		</p>
+		<p>
+			姓名<input type="text" name="userName" value="武义然" class="i1"  />
+		</p>
+		<p>
+			性别<input type="text" name="sex" value="男" class="i1"  />
+		</p>
+		<p>
+			年龄<input type="text" name="age" value="22" class="i1"  />
+		</p>
+	</form>
+	</div>
+	<div id="cv">
+	<canvas id="canvas1" width="320" height="240"></canvas>
+	
+	<button onclick="scamera()">拍照</button>
+	<button onclick="register()">注册</button>
+	</div>
+	</div>
+	<div id="detect_info">
+		<fieldset>
+			<legend>人脸信息</legend>
+			性别：<input id="gender" class="i2"   />
+			年龄：<input id="age" class="i2"   /> 
+			种族：<input id="race" class="i2"   />
+			颜值：<input id="beauty" class="i2"   /> 
+			表情：<input id="expression" class="i2"   /> 
+			眼镜：<input id="glasses" class="i2"   /> 
+			性别置信度：<input id="gender_probability" class="i2"   /> 
+			眼镜置信度：<input id="glasses_probability" class="i2"   /> 
+			种族置信度：<input id="race_probability" class="i2"   />
+			人脸置信度：<input id="face_probability" class="i2"   /> 
+			表情置信度：<input id="expression_probablity" class="i2"   />
+		</fieldset>
+		<fieldset>
+			<legend>图像信息</legend>
+			光照度：<input id="illumination" class="i2"   />
+			模糊程度：<input id="blur" class="i2"   /> 
+			完整度：<input id="completeness" class="i2"   /> 
+				卡通人物置信度：<input id="cartoon" class="i2"   /> 
+				人类置信度：<input id="human" class="i2"   />
+				<fieldset>
+					<legend>遮挡情况</legend> 
+					右眼：<input id="right_eye" class="i2"   /> 
+					鼻子：<input id="nose" class="i2"   />
+					嘴巴：<input id="mouth" class="i2"   /> 
+					下巴：<input id="chin" class="i2"   /> 
+					左眼：<input id="left_eye" class="i2"   /> 
+					左脸颊：<input id="left_cheek" class="i2"   /> 
+					右脸颊：<input id="right_cheek" class="i2"   />
+				</fieldset>
+				<fieldset>
+					<legend>人脸位置情况</legend> 
+				 上：<input id="top" class="i2"   /> 
+				 左：<input id="left" class="i2"   /> 
+				 宽：<input id="width" class="i2"   /> 
+				 高：<input id="height" class="i2"   /> 
+				 旋转角度：<input id="rotation_angle" class="i2"   /> 
+				 俯仰角度：<input id="pitch" class="i2"   />
+				</fieldset>
+		</fieldset>
+
+		<input id="result_num" />
+	</div>
+	<script type="text/javascript">
+		var video = document.getElementById("video1");//获取vedio对象
+
+		//将摄像头视频流放到vedio对象中
+		navigator.getUserMedia = navigator.getUserMedia
+				|| navigator.webkitGetUserMedia;
+		if (navigator.getUserMedia) {
+			if (navigator.webkitURL) {
+				navigator.getUserMedia("video1", function(stream) {
+					video.src = window.webkitURL.createObjectURL(stream);
+				}, function(error) {
+					alert(error);
+				});
+			} else {
+				navigator.getUserMedia({
+					video : true
+				}, function(stream) {
+					video.src = window.webkitURL.createObjectURL(stream);
+				}, function(error) {
+					alert(error);
+				});
+			}
+		} else {
+			alert("获取信息流有问题");
+		}
+
+		//拍照识别照片情况
+		function scamera() {
+			var videoElement = document.getElementById('video1');
+			var canvasObj = document.getElementById('canvas1');
+			var context1 = canvasObj.getContext('2d');
+			context1.fillStyle = "#ffffff";
+			context1.fillRect(0, 0, 320, 240);
+			context1.drawImage(videoElement, 0, 0, 320, 240);
+
+			var imgstr = document.getElementById('canvas1').toDataURL();
+
+			imgstr = imgstr.substring(22);
+			var data = {
+				img : imgstr
+			};
+
+			jQuery.ajax({
+				url : '/facedetect',
+				data : data,
+				type : "POST",
+				dataType : "json",
+				// 期待的返回值类型 
+				success : function(data) {
+					if(data.result_num>0){
+						
+						var d1 = data.result;
+						$("#expression").val(d1[0].expression);
+						$("#beauty").val(d1[0].beauty+40);
+						$("#gender").val(d1[0].gender);
+						$("#race").val(d1[0].race);
+						$("#gender_probability").val(d1[0].gender_probability);
+						$("#roll").val(d1[0].roll);
+						$("#glasses_probability").val(d1[0].glasses_probability);
+						$("#race_probability").val(d1[0].race_probability);
+						$("#face_probability").val(d1[0].face_probability);
+						$("#yaw").val(d1[0].yaw);
+						$("#glasses").val(d1[0].glasses);
+						$("#expression_probablity").val(d1[0].expression_probablity);
+						$("#age").val(d1[0].age);
+						$("#pitch").val(d1[0].pitch);
+						$("#rotation_angle").val(d1[0].rotation_angle);
+						var d2 = d1[0].qualities;
+						$("#illumination").val(d2.illumination);
+						$("#blur").val(d2.blur);
+						$("#completeness").val(d2.completeness);
+						
+						var d3 = d2.occlusion;
+						
+						$("#right_eye").val(d3.right_eye);
+						$("#nose").val(d3.nose);
+						$("#mouth").val(d3.mouth);
+						$("#chin").val(d3.chin);
+						$("#left_eye").val(d3.left_eye);
+						$("#left_cheek").val(d3.left_cheek);
+						$("#right_cheek").val(d3.right_cheek);
+						
+						var d4 = d2.type;
+						
+						$("#cartoon").val(d4.cartoon);
+						$("#human").val(d4.human);
+						
+						 var d5 = d1[0].location;
+						 $("#top").val(d5.top);
+						 $("#left").val(d5.left);
+						 $("#width").val(d5.width);
+						 $("#height").val(d5.height);
+						 
+						 
+					}else{
+						alert("头像不符合要求，请重试！");
+					}
+					
+				}
+			});
+		}
+
+		//用户注册
+		function register() {
+
+			var imgstr = document.getElementById('canvas1').toDataURL();
+
+			imgstr = imgstr.substring(22);
+			var user = $("#form_id").serialize();
+			user = decodeURIComponent(user, true);
+			var data = {
+				img : imgstr,
+				user : user,
+
+			};
+			jQuery.ajax({
+				url : '/faceregister',
+				data : data,
+				type : "POST",
+				// 期待的返回值类型 
+				success : function(data) {
+					if (data == "success") {
+						window.location.href = "/login";
+					} else {
+						alert(data);
+					}
+				}
+			});
+		}
+	</script>
+</body>
+</html>

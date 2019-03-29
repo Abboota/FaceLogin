@@ -1,0 +1,85 @@
+<!DOCTYPE HTML >
+<html>
+<head>
+<title>验证</title>
+<script src="/js/jquery-1.7.2.js"></script>
+<style type="text/css">
+#div1 {
+	margin-left: 35%;
+}
+#btn1{margin-left: 45%;}
+</style>
+</head>
+<body>
+	<div id="div1">
+		<video id="video1" autoplay="" width="320" height="240"></video>
+	</div>
+
+	<canvas id="canvas1" width="320" height="240" style="display: none;"></canvas>
+
+	<button onclick="login()" id="btn1">登录</button>
+
+
+
+	<script type="text/javascript">
+		var video = document.getElementById("video1");//获取vedio对象
+
+		//将摄像头视频流放到vedio对象中
+		navigator.getUserMedia = navigator.getUserMedia
+				|| navigator.webkitGetUserMedia;
+		if (navigator.getUserMedia) {
+			if (navigator.webkitURL) {
+				navigator.getUserMedia("video1", function(stream) {
+					video.src = window.webkitURL.createObjectURL(stream);
+				}, function(error) {
+					alert(error);
+				});
+			} else {
+				navigator.getUserMedia({
+					video : true
+				}, function(stream) {
+					video.src = window.webkitURL.createObjectURL(stream);
+				}, function(error) {
+					alert(error);
+				});
+			}
+		} else {
+			alert("获取信息流有问题");
+		}
+
+		//登录
+		function login() {
+			var videoElement = document.getElementById('video1');
+			var canvasObj = document.getElementById('canvas1');
+			var context1 = canvasObj.getContext('2d');
+
+			context1.drawImage(videoElement, 0, 0, 320, 240);
+
+			var imgstr = document.getElementById('canvas1').toDataURL();
+
+			imgstr = imgstr.substring(22);
+
+			var data = {
+				img : imgstr
+			};
+			jQuery.ajax({
+				url : '/facelogin',
+				data : data,
+				type : "POST",
+				datatype : "JSON",
+				// 期待的返回值类型 
+				success : function(data) {
+					if (data == "fail") {
+						alert("登录失败,请重试！");
+						window.location.href="login.html"
+					} else {
+						alert(data);
+						
+					}
+				}
+			});
+		}
+		
+	</script>
+</body>
+</html>

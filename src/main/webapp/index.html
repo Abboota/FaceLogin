@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>欢迎页</title>
+<style type="text/css">
+h2{text-align: center;}
+img {width: 20%;height: 20%;}
+a{text-decoration:none;}
+</style>
+<script type="text/javascript" src="js/jquery-1.7.2.js"></script>
+</head>
+<body>
+<h2>欢迎来到刷脸登录系统体验区</h2>
+<div id="login">
+<a href="/login"><img  src="img/faceicon.jpg" onclick="login()"/></a>
+</div>
+
+
+<script type="text/javascript">
+function login(){
+	alert("yes");
+	$.ajax({
+		  type: 'POST',
+		  url: "/login",
+		  success:function(){
+			  
+		  }
+		  
+		});
+	
+}
+</script>
+</body>
+</html>
